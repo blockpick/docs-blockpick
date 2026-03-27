@@ -1,0 +1,33 @@
+# 토큰 관리
+
+## 인증 토큰 구조
+
+| 토큰 | 용도 | 수명 |
+|------|------|------|
+| **accessToken** | JWT, API 요청 인증 | 단기 |
+| **refreshToken** | JWT, 토큰 갱신용 | 장기 |
+
+## 저장소
+
+| 플랫폼 | 저장소 |
+|--------|--------|
+| **앱 (Flutter)** | Flutter Secure Storage (암호화) |
+| **웹** | localStorage (Phase 2에서 httpOnly Cookie로 전환 예정) |
+
+## 자동 갱신 (FR-006)
+
+GraphQL 인터셉터에서 401 응답 시 자동으로 토큰을 리프레시합니다.
+
+| 항목 | 내용 |
+|------|------|
+| **입력** | refreshToken |
+| **출력** | 새로운 accessToken, refreshToken |
+| **비즈니스 규칙** | refreshToken 만료 시 재로그인 유도, 401 응답 시 자동 트리거 |
+| **검증 기준** | 토큰 만료 후에도 API 호출이 끊기지 않음 |
+
+## 보안 고려사항 (NFR-006)
+
+- 앱: Flutter Secure Storage 사용 (Keychain/Keystore 기반 암호화)
+- 웹: 현재 localStorage 사용 중 (XSS 취약점 존재)
+- Phase 2에서 httpOnly Cookie로 전환 예정
+- 모든 API 통신은 HTTPS 필수

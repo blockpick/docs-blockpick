@@ -1,0 +1,25 @@
+# 플랫폼 구성
+
+블록픽은 앱, 웹, 백엔드의 3개 플랫폼으로 구성됩니다.
+
+## 플랫폼 개요
+
+| 플랫폼 | 기술 스택 | 역할 |
+|--------|-----------|------|
+| **앱 (app-blockpick)** | Flutter 3.35 + Dart 3.9 | 메인 앱 (iOS/Android/Web/macOS) |
+| **웹 (web-blockpick)** | Next.js 16 + React 19 + TypeScript | 랜딩 페이지 + 웹뷰 게임 화면 |
+| **백엔드** | GraphQL API (`api-dev.blockpick.net`) | 인증, 게임, 결제, 블록체인 연동 |
+
+## 플랫폼 역할 분담
+
+| 플랫폼 | 주요 역할 |
+|--------|-----------|
+| **앱** | 메인 사용자 경험, 회원 관리, 블록체인, 결제, 센서 기반 모드 |
+| **웹** | 랜딩 페이지, WebView 게임 화면 (가챠), 미니게임, 프리미엄 3D 게임 |
+
+## 백엔드 인프라
+
+- **API**: GraphQL (단일 엔드포인트: `https://api-dev.blockpick.net/graphql`)
+- **스토리지**: AWS S3 (`blockpick-dev-storage.s3.us-west-2.amazonaws.com`)
+- **블록체인**: Ronin Mainnet (Chain ID: 2020)
+- **쿠폰 연동**: Giftshow API (기프티쇼 쿠폰 URL 발급)

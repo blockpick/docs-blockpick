@@ -1,0 +1,36 @@
+# 앱-웹 연동
+
+Flutter 앱과 Next.js 웹 간의 통신 구조입니다.
+
+## WebView Bridge 개요
+
+Flutter 앱은 게임 화면을 WebView로 로드하며, 양방향 통신을 위한 Bridge를 사용합니다.
+
+## 토큰 전달
+
+Flutter WebView에서 웹 게임 화면 로드 시 URL 파라미터로 토큰을 전달합니다:
+
+```
+?source=app&token=xxx&platform=ios|android
+```
+
+## JavascriptChannel Bridge
+
+`window.BlockPickBridge`를 통해 양방향 통신을 수행합니다.
+
+## 통신 플로우
+
+1. **앱 → 웹**: WebView 로드 시 URL 파라미터로 token, platform 전달
+2. **웹 감지**: `detectContext()` 함수로 앱 모드 감지
+3. **세션 복원**: `restoreSession()` 함수로 토큰 복원
+4. **게임 플레이**: 웹에서 게임 화면 렌더링 및 참여 처리
+5. **결과 전달**: `BlockPickBridge.postMessage(결과)` 로 앱에 결과 전달
+6. **앱 수신**: JavascriptChannel 콜백으로 결과 수신
+
+## 상태 관리
+
+### 웹 (Zustand Auth Store)
+
+- `context`: app vs web 감지 결과
+- `accessToken`, `refreshToken`: 앱에서 전달받은 토큰
+- `restoreSession()`: 토큰 복원 함수

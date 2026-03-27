@@ -1,0 +1,12 @@
+{
+  "app-main": "앱 메인 탭",
+  "app-game": "앱 게임 화면",
+  "app-wish": "소원/소문 화면",
+  "app-prime": "PRIME 역경매",
+  "app-creative-pick": "크리에이티브 픽 모드",
+  "app-mypage": "마이페이지",
+  "app-settings": "설정",
+  "web": "웹 화면",
+  "admin": "관리자 화면",
+  "summary": "화면 통계"
+}

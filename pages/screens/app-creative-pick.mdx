@@ -1,0 +1,36 @@
+# 크리에이티브 픽 모드
+
+센서, 카메라, 음성 등 다양한 입력을 활용한 좌표 선택 방식입니다. 총 12종 + Unity 2종이 제공됩니다.
+
+## 모드 목록
+
+| # | 모드 | 화면 | 인터랙션 방식 | 완성도 |
+|---|------|------|---------------|--------|
+| A-40 | **Gravity** | GravityPickScreen | 디바이스 기울기(가속도 센서)로 좌표 결정 | 85% |
+| A-41 | **Time** | TimePickScreen | 현재 타임스탬프 기반 좌표 생성 | 70% |
+| A-42 | **Draw** | DrawPickScreen | 캔버스에 그림 그려서 좌표 추출 | 70% |
+| A-43 | **Wave** | WavePickScreen | 탭으로 파동 생성, 파동 교차점이 좌표 | 70% |
+| A-44 | **Voice** | VoicePickScreen | 마이크 입력(음량/주파수)으로 좌표 결정 | 70% |
+| A-45 | **Farm** | FarmPickScreen | 좌표를 심고 시간에 따라 성장시키는 방식 | 65% |
+| A-46 | **RPG** | RpgPickScreen | 캐릭터를 이동시켜 상품 이미지 위에서 좌표 선택 | 65% |
+| A-47 | **Duo** | DuoPickScreen | 다른 플레이어와 좌표를 조합 | 60% |
+| A-48 | **Fortune** | FortunePickScreen | 질문에 답하면 운세 기반 좌표 생성 | 70% |
+| A-49 | **Predict** | PredictPickScreen | 다음 당첨 셀 예측 | 70% |
+| A-50 | **Gacha** | GachaPickScreen | 가챠 머신 스타일 | 70% |
+| A-51 | **Treasure** | TreasurePickScreen | 보물찾기 스타일 | 90% |
+
+## Unity 3D 게임
+
+| # | 화면 | 경로 | 설명 | 완성도 |
+|---|------|------|------|--------|
+| A-52 | Unity 게임 선택 | `/more/unity` | Unity 3D 게임 목록 | 60% |
+| A-53 | Unity 플레이 | `/more/unity/play` | Unity 3D 게임 실행 | 60% |
+
+## 사용하는 센서/API
+
+| 모드 | 기술 |
+|------|------|
+| Gravity | `sensors_plus` (가속도 센서) |
+| Voice | `noise_meter` (마이크 입력) |
+| Draw | `CustomPaint` (캔버스) |
+| Unity | `flutter_embed_unity` |

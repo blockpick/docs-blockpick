@@ -1,0 +1,31 @@
+# 백엔드
+
+블록픽 백엔드 인프라 정보입니다.
+
+## API
+
+| 항목 | 내용 |
+|------|------|
+| **프로토콜** | GraphQL |
+| **엔드포인트** | `https://api-dev.blockpick.net/graphql` |
+| **인증** | Bearer Token (JWT) |
+
+## 인프라
+
+| 구성 요소 | 개발 환경 | 프로덕션 (예정) |
+|-----------|-----------|----------------|
+| API | `api-dev.blockpick.net` | `api.blockpick.net` |
+| S3 | `blockpick-dev-storage` | `blockpick-storage` |
+| 블록체인 | Ronin Mainnet (2020) | Ronin Mainnet |
+| 웹 | Vercel | Vercel 또는 AWS CloudFront |
+| 앱 | 로컬 빌드 | App Store / Google Play |
+| 모니터링 | - | CloudWatch, Sentry (추후) |
+
+## 보안 요구사항 (NFR-008)
+
+- HTTPS (TLS 1.2+)
+- Bearer 토큰 인증
+- Rate Limiting
+- Input Validation
+- Query Depth Limit
+- 프로덕션에서 GraphQL Introspection 비활성화 필수

@@ -1,0 +1,171 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1774587384159,
+  "projectRoot": "/Users/simjaehyeong/Desktop/adrock/blockpick/docs-blockpick",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "14.2.0",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev",
+      "build": "next build",
+      "start": "next start"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "pages",
+      "public"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "pages": {
+      "path": "pages",
+      "purpose": "Page components",
+      "fileCount": 3,
+      "lastAccessed": 1774587384128,
+      "keyFiles": [
+        "_app.tsx",
+        "_meta.json",
+        "index.mdx"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1774587384128,
+      "keyFiles": []
+    },
+    "pages/data": {
+      "path": "pages/data",
+      "purpose": "Data files",
+      "fileCount": 5,
+      "lastAccessed": 1774587384147,
+      "keyFiles": [
+        "_meta.json",
+        "entities.mdx",
+        "erd.mdx"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "pages/screens/app-main.mdx",
+      "accessCount": 3,
+      "lastAccessed": 1774588133493,
+      "type": "file"
+    },
+    {
+      "path": "pages/screens/app-game.mdx",
+      "accessCount": 2,
+      "lastAccessed": 1774588160037,
+      "type": "file"
+    },
+    {
+      "path": "pages/game-system/game-types.mdx",
+      "accessCount": 2,
+      "lastAccessed": 1774588182173,
+      "type": "file"
+    },
+    {
+      "path": "pages/game-system/gacha-mechanic.mdx",
+      "accessCount": 2,
+      "lastAccessed": 1774588198704,
+      "type": "file"
+    },
+    {
+      "path": "pages/game-system/mini-games.mdx",
+      "accessCount": 2,
+      "lastAccessed": 1774588209376,
+      "type": "file"
+    },
+    {
+      "path": "pages/game-system/_meta.json",
+      "accessCount": 2,
+      "lastAccessed": 1774588213701,
+      "type": "file"
+    },
+    {
+      "path": "pages/screens/app-wish.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1774588010279,
+      "type": "file"
+    },
+    {
+      "path": "pages/screens/app-prime.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1774588010902,
+      "type": "file"
+    },
+    {
+      "path": "pages/screens/_meta.json",
+      "accessCount": 1,
+      "lastAccessed": 1774588012960,
+      "type": "file"
+    },
+    {
+      "path": "pages/blockchain/features.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1774588028806,
+      "type": "file"
+    },
+    {
+      "path": "pages/blockchain/network.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1774588029248,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

@@ -1,0 +1,81 @@
+# 앱 (Flutter)
+
+app-blockpick의 기술 스택입니다.
+
+## 기술 스택
+
+| 분류 | 기술 | 버전 |
+|------|------|------|
+| 프레임워크 | Flutter | 3.35.6 |
+| 언어 | Dart | 3.9.2 |
+| 상태 관리 | Riverpod (코드 제너레이션) | 2.6.1 |
+| API 클라이언트 | GraphQL Flutter | 5.1.2 |
+| HTTP | Dio | 5.4.0 |
+| 라우팅 | GoRouter | 17.0.1 |
+| 블록체인 | web3dart | 2.7.3 |
+| 암호화 | encrypt (AES-256) | 5.0.3 |
+| 키 관리 | bip39 | 1.0.6 |
+| 보안 저장소 | flutter_secure_storage | 10.0.0 |
+| 로컬 DB | Hive | 2.2.3 |
+| 직렬화 | Freezed + json_serializable | 2.4.7 / 6.7.1 |
+| 소셜 로그인 | google_sign_in / sign_in_with_apple | 7.2.0 / 7.0.1 |
+| 광고 | google_mobile_ads | 5.3.0 |
+| 센서 | sensors_plus / noise_meter | 7.0.0 / 5.0.2 |
+| 차트 | fl_chart / Syncfusion Charts | 1.1.1 / 32.1 |
+| 3D | flutter_embed_unity | 1.4.0 |
+| 애니메이션 | flutter_animate | 4.3.0 |
+| WebView | webview_flutter | 4.10.0 |
+| 아이콘 | lucide_icons | 0.257.0 |
+
+## 프로젝트 구조
+
+```
+app-blockpick/
+├── lib/
+│   ├── main.dart                 # 앱 엔트리포인트
+│   ├── core/
+│   │   ├── auth/                 # 인증 (datasource, repository, provider)
+│   │   ├── blockchain/           # web3dart, 지갑, 암호화
+│   │   ├── graphql/              # GraphQL 클라이언트 설정
+│   │   ├── router/               # GoRouter 라우트 정의
+│   │   └── theme/                # 앱 테마/스타일
+│   ├── features/
+│   │   ├── home/                 # 홈 탭 (뉴홈, 이벤트, 파트너)
+│   │   ├── game/                 # 게임 화면 (Gacha, Grid, Optimal)
+│   │   ├── more/                 # 크리에이티브 픽 모드 12종
+│   │   ├── winners/              # 당첨자 화면
+│   │   ├── my/                   # 마이페이지 + 하위 화면
+│   │   ├── settings/             # 설정 화면
+│   │   ├── auth/                 # 인증 화면 (로그인, 회원가입)
+│   │   ├── notification/         # 알림
+│   │   ├── checkin/              # 출석체크
+│   │   └── unity/                # Unity 3D 임베딩
+│   ├── widgets/                  # 공용 위젯
+│   └── providers/                # Riverpod 프로바이더
+├── assets/
+│   ├── images/                   # 이미지 에셋
+│   ├── icons/                    # 아이콘 에셋
+│   └── shaders/                  # GLSL 프래그먼트 셰이더 6종
+└── pubspec.yaml                  # 의존성 관리
+```
+
+## 상태 관리 (Riverpod)
+
+### Auth Providers
+- `authProvider`: 인증 상태
+- `isAuthenticatedProvider`: 인증 여부
+- `currentUserProvider`: 현재 사용자
+- `authTokenProvider`: JWT 토큰
+
+### Game Providers
+- `gameProvider(id)`: 게임 상세
+- `gamesByTypeProvider`: 타입별 게임
+- `gameJoinProgressProvider`: 참여 진행
+- `gameResultProvider(id)`: 결과
+- `instantPrizeProvider(id)`: 즉시 당첨
+
+### User Data Providers
+- `walletProvider`: 지갑/잔액
+- `pendingTransactionProvider`: 진행 중 TX
+- `adRewardProvider`: 광고 리워드
+- `notificationSettingsProvider`: 알림 설정

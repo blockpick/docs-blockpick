@@ -1,0 +1,76 @@
+# 미니게임 (30종+)
+
+웹 기반으로 제공되는 다양한 미니게임입니다.
+
+## 물리 시뮬레이션 계열
+
+| 게임 | 설명 | 엔진 |
+|------|------|------|
+| **Plinko** | 공 낙하 물리 시뮬레이션 | Matter.js |
+| **CoinPusher** | 코인 푸셔 (2D) | Matter.js |
+| **CoinPusher3D** | 코인 푸셔 (3D) | Three.js |
+| **BallHole** | 공 홀인원 (2D) | Matter.js |
+| **BallHole3D** | 공 홀인원 (3D) | Three.js |
+| **BottleFlip** | 물병 뒤집기 | Matter.js |
+| **BlockPull** | 젠가 스타일 블록 빼기 | Matter.js |
+| **FreeThrow** | 농구 자유투 | Matter.js |
+
+## 스킬/타이밍 계열
+
+| 게임 | 설명 |
+|------|------|
+| **StackTower / StackTower3D** | 블록 쌓기 (타이밍) |
+| **SwingStopper / SwingStopper3D** | 스윙 정지 (타이밍) |
+| **ClawMachine** | 크레인 인형뽑기 |
+| **CapsuleMachine** | 캡슐 머신 (슬롯) |
+| **Roulette** | 룰렛 (스핀) |
+| **Edge** | 줄 당기기 장력 게임 |
+| **PourPerfect** | 정밀 따르기 |
+| **DalgonaGame** | 달고나 모양 깎기 |
+
+## 탐색/발견 계열
+
+| 게임 | 설명 |
+|------|------|
+| **RadarScan** | 레이더 탐지 |
+| **MetalDetector** | 금속 탐지기 |
+| **CrystalCrack** | 크리스탈 깨기 |
+| **GoldenEgg** | 황금알 깨기 |
+| **LuckyFishing** | 낚시 반사 게임 |
+
+## 리스크/판단 계열
+
+| 게임 | 설명 |
+|------|------|
+| **BubblePop** | 버블 터뜨리기 |
+| **BalloonPump** | 풍선 불기 (파열 리스크) |
+
+## 가챠 계열 (메인 게임에서 이동)
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+  기존 메인 게임 방식이었던 가챠(좌표 선택)가 미니게임으로 이동되었습니다. 자세한 메커닉은 [GachaCanvas 메커닉](/game-system/gacha-mechanic)을 참조하세요.
+</Callout>
+
+| 게임 | 설명 |
+|------|------|
+| **GachaCanvas** | 2단계 좌표 선택 (X→Y 크로스헤어) |
+
+## AR/카메라 계열
+
+| 게임 | 설명 | 기술 |
+|------|------|------|
+| **ARGacha** | AR 카메라 + 손 제스처 인식 | MediaPipe Tasks Vision |
+| **HandGacha** | 손 제스처 기반 가챠 | MediaPipe |
+| **GestureMap** | 손 제스처 매핑 | MediaPipe |
+
+## 기술 스택
+
+| 분류 | 기술 |
+|------|------|
+| 2D 물리 | Matter.js 0.20 |
+| 3D 그래픽 | Three.js 0.170 + React Three Fiber 9.5 |
+| 3D 물리 | Rapier (via @react-three/rapier 2.2) |
+| AR | MediaPipe Tasks Vision 0.10 |
+| 애니메이션 | Framer Motion 12.35 |

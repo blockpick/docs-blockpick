@@ -1,0 +1,135 @@
+# 데이터 엔티티
+
+블록픽의 핵심 데이터 엔티티 정의입니다.
+
+## User (사용자)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| email | String | O | 이메일 (로그인 ID) |
+| nickname | String | - | 표시 닉네임 |
+| phone | String | - | 전화번호 (인증 완료) |
+| passwordHash | String | O | 비밀번호 해시 |
+| provider | Enum | O | 가입 경로 (EMAIL/GOOGLE/APPLE) |
+| walletAddress | String | - | Ronin 지갑 주소 |
+| shoppingCash | Int | O | 쇼핑캐시 잔액 |
+| eventPoints | Int | O | 이벤트 포인트 잔액 |
+| status | Enum | O | 계정 상태 (ACTIVE/SUSPENDED/WITHDRAWN) |
+| marketingConsent | Boolean | O | 마케팅 수신 동의 |
+| createdAt | DateTime | O | 가입일 |
+| updatedAt | DateTime | O | 수정일 |
+
+## Game (게임)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| title | String | O | 게임 제목 |
+| description | String | - | 게임 설명 |
+| gameType | Enum | O | DAILY / SELECT / VIBE / PRIME / PARTNER |
+| status | Enum | O | SCHEDULED / ACTIVE / ENDED / CANCELLED |
+| entryFee | Int | O | 참여비 (쇼핑캐시) |
+| maxEntries | Int | O | 최대 참여 수 |
+| currentEntries | Int | O | 현재 참여 수 |
+| gridRows | Int | O | 그리드 행 수 |
+| gridCols | Int | O | 그리드 열 수 |
+| startTime | DateTime | O | 게임 시작 시간 |
+| endTime | DateTime | O | 게임 종료 시간 |
+| onchainTxHash | String | - | 블록체인 트랜잭션 해시 |
+| onchainContractAddr | String | - | 스마트 컨트랙트 주소 |
+| createdAt | DateTime | O | 생성일 |
+
+## GameProduct (게임 상품)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| gameId | ID | O | 소속 게임 ID |
+| name | String | O | 상품명 |
+| description | String | - | 상품 설명 |
+| price | Int | O | 상품 정가 (원) |
+| imageUrl | String | O | 상품 이미지 URL (S3) |
+| brand | String | - | 브랜드명 |
+
+## Entry (게임 참여)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 (엔트리 ID) |
+| gameId | ID | O | 게임 ID |
+| userId | ID | - | 회원 ID (비회원은 null) |
+| guestToken | String | - | 비회원 토큰 |
+| phoneNumber | String | - | 비회원 전화번호 |
+| gridX | Int | O | 선택한 X좌표 (열) |
+| gridY | Int | O | 선택한 Y좌표 (행) |
+| encryptedCoord | String | - | 암호화된 좌표 데이터 |
+| coordHash | String | - | 좌표 SHA-256 해시 |
+| status | Enum | O | PENDING / CONFIRMED / WON / LOST |
+| onchainTxHash | String | - | 블록체인 트랜잭션 해시 |
+| idempotencyKey | String | - | 중복 참여 방지 키 |
+| createdAt | DateTime | O | 참여 시간 |
+
+## Prize (상품/당첨)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| gameId | ID | O | 게임 ID |
+| entryId | ID | - | 당첨 엔트리 ID |
+| name | String | O | 상품명 |
+| type | Enum | O | MAIN / INSTANT |
+| giftshowCouponUrl | String | - | 기프티쇼 쿠폰 URL |
+| claimed | Boolean | O | 수령 여부 |
+
+## ShippingAddress (배송지)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| userId | ID | O | 사용자 ID |
+| recipientName | String | O | 수령인 이름 |
+| phone | String | O | 수령인 전화번호 |
+| zipCode | String | O | 우편번호 |
+| address | String | O | 주소 |
+| addressDetail | String | - | 상세 주소 |
+| isDefault | Boolean | O | 기본 배송지 여부 |
+
+## Transaction (거래)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| userId | ID | O | 사용자 ID |
+| type | Enum | O | CHARGE / SPEND / REFUND / REWARD |
+| currencyType | Enum | O | SHOPPING_CASH / EVENT_POINT |
+| amount | Int | O | 금액 |
+| balance | Int | O | 거래 후 잔액 |
+| description | String | - | 거래 설명 |
+| relatedGameId | ID | - | 관련 게임 ID |
+| createdAt | DateTime | O | 거래 시간 |
+
+## Review (후기)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| userId | ID | O | 작성자 ID |
+| gameId | ID | O | 게임 ID |
+| prizeId | ID | O | 당첨 상품 ID |
+| content | String | O | 후기 내용 |
+| imageUrls | [String] | - | 첨부 이미지 |
+| rating | Int | - | 평점 (1~5) |
+| createdAt | DateTime | O | 작성일 |
+
+## Coupon (쿠폰)
+
+| 필드 | 타입 | 필수 | 설명 |
+|------|------|------|------|
+| id | ID | O | 고유 식별자 |
+| userId | ID | O | 소유자 ID |
+| code | String | O | 쿠폰 코드 |
+| discountType | Enum | O | FIXED / PERCENT |
+| discountValue | Int | O | 할인 금액/비율 |
+| expiresAt | DateTime | O | 만료일 |
+| used | Boolean | O | 사용 여부 |

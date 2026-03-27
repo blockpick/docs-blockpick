@@ -1,0 +1,47 @@
+# 웹 화면
+
+web-blockpick의 화면 구성입니다.
+
+| # | 화면명 | 경로 | 기능 요약 |
+|---|--------|------|-----------|
+| W-01 | 랜딩 페이지 | `/` | 서비스 소개, 앱 다운로드 CTA |
+| W-02 | 게임 목록 | `/game` | 활성 게임 리스트 (DAILY/VIBE/PRIME) |
+| W-03 | 가챠 게임 (VIBE) | `/game/[id]` | 가챠 게임 (소원 상품 이미지 동적 배경) |
+| W-04 | 소원 리스트 | `/wish` | 소원 탐색, 공감, 소문내기 진입 |
+| W-05 | 소원 상세 | `/wish/[id]` | 소원 상세, 공감, 댓글 |
+| W-06 | Singularity | `/game/singularity` | 3D 우주 테마 게임 |
+| W-07 | Abyssal | `/game/abyssal` | 3D 심해 테마 게임 |
+| W-08 | 미니게임 목록 | `/more` | 30종+ 미니게임 카탈로그 |
+| W-09 | 미니게임 플레이 | `/more/[id]` | 개별 미니게임 실행 |
+
+## 랜딩 페이지 (W-01)
+
+서비스 소개를 위한 마케팅 페이지:
+- 히어로 섹션 (서비스 소개)
+- 기능 소개 섹션
+- 디바이스 목업
+- 앱 다운로드 CTA (App Store / Google Play)
+
+## 게임 목록 (W-02)
+
+필터 탭으로 게임을 분류합니다:
+- ALL (전체)
+- DAILY (일일)
+- VIBE (소원/소문)
+- PRIME (역경매)
+- PARTNER (파트너)
+
+## 가챠 게임 (W-03)
+
+웹 기반 GachaCanvas 컴포넌트:
+1. X좌표 선택 (COL): 크로스헤어 수평 이동 → 탭으로 정지
+2. Y좌표 선택 (ROW): 크로스헤어 수직 이동 → 탭으로 정지
+3. 결과 확인: 파티클 이펙트 (컨페티, 스파클), Elastic 이징
+
+## 프리미엄 게임
+
+### Singularity (W-06) - 우주 테마
+Three.js + React Three Fiber + Post-processing 기반 5단계 플로우
+
+### Abyssal (W-07) - 심해 테마
+Three.js + React Three Fiber + Rapier Physics 기반 14종 심리학 메커닉

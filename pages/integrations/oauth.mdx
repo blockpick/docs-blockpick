@@ -1,0 +1,19 @@
+# 소셜 로그인
+
+## Google OAuth 2.0
+
+| 항목 | 내용 |
+|------|------|
+| **패키지** | google_sign_in 7.2.0 |
+| **플랫폼** | iOS, Android |
+| **스코프** | email, profile |
+| **토큰 처리** | Google ID Token → 백엔드 검증 → 자체 JWT 발급 |
+
+## Apple Sign-In
+
+| 항목 | 내용 |
+|------|------|
+| **패키지** | sign_in_with_apple 7.0.1 |
+| **플랫폼** | iOS (필수), Android (선택) |
+| **스코프** | email, fullName |
+| **주의사항** | Apple은 최초 로그인 시에만 이메일 제공, 이후 요청 시 null |

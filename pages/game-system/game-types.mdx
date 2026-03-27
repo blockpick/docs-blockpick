@@ -1,0 +1,87 @@
+# 게임 타입
+
+블록픽의 5가지 게임 타입입니다.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning">
+  DAILY·VIBE의 메인 게임 방식이 가챠(좌표 선택)에서 **블록픽 판** (블록체인 기반 보드)으로 변경되었습니다. 가챠는 미니게임으로 이동되었습니다.
+</Callout>
+
+| 타입 | 설명 | 참여 방식 | 상태 |
+|------|------|-----------|------|
+| **DAILY** | 매일 진행되는 일일 게임 | **블록픽 판** (블록체인 기반 보드) | 운영 중 |
+| **SELECT** | 사용자가 직접 블록을 선택하는 게임 | 그리드에서 블록 터치 | 홀딩 |
+| **VIBE** | 분위기/테마 기반 게임 (소원/소문) | **블록픽 판** (블록체인 기반 보드) | 운영 중 |
+| **PRIME** | 프리미엄 역경매 게임 | 입찰 금액 입력 (스크롤 리스트 UI) | 개발 예정 |
+| **PARTNER** | 파트너 브랜드 협업 게임 | 비회원 참여 가능 (전화번호만) | 운영 중 |
+
+## DAILY
+
+매일 진행되는 저가 상품 게임입니다. 커피, 라면 등 일상 상품을 대상으로 하며, **블록픽 판** (블록체인 기반 보드)을 통해 참여합니다. 블록 선택 → 블록체인 암호화 기록 → 결과 판정의 흐름으로 진행되며, 온체인 기록으로 투명성을 보장합니다.
+
+## SELECT (홀딩)
+
+사용자가 그리드에서 직접 블록을 선택하는 방식입니다. 최대 1000x1000 그리드를 지원하며 CustomPaint 기반으로 렌더링됩니다. 현재 서비스에서 홀딩 상태입니다.
+
+## VIBE (소원/소문)
+
+위시 탭의 핵심 게임입니다. 사용자가 등록한 소원 상품을 대상으로 **블록픽 판** (블록체인 기반 보드)에 참여합니다. 10원으로 참여할 수 있는 소문내기 메커닉이 특징이며, 블록체인 기록으로 결과의 투명성을 보장합니다.
+
+## PRIME (역경매)
+
+고가 상품을 대상으로 한 역경매 방식입니다. 사용자가 원하는 가격을 입찰하고, 가장 낮으면서 유일한 금액을 입찰한 사용자가 당첨됩니다. **스크롤 리스트 UI**를 그대로 유지합니다.
+
+## PARTNER
+
+외부 브랜드와 협업하여 운영하는 게임입니다. 비회원도 전화번호만으로 참여할 수 있으며, 즉시 당첨 시 기프티쇼 쿠폰이 발급됩니다.
+
+## 게임 API
+
+| 오퍼레이션 | 타입 | 입력 | 출력 |
+|-----------|------|------|------|
+| `getGames` | Query | - | [Game] |
+| `getActiveGames` | Query | - | [Game] |
+| `getGame` | Query | id | Game (상세) |
+| `joinGame` | Mutation | gameId, gridX, gridY | entryId, status, txHash |
+| `joinPartnerGame` | Mutation | gameId, idempotencyKey, phoneNumber? | entryId, guestToken, prize? |
+| `claimInstantPrize` | Mutation | gameId, gridX, gridY | prize, giftshowCouponUrl |
+| `getGameInstantPrizes` | Query | gameId | [InstantPrize] |
+
+## 데이터 모델
+
+```graphql
+type Game {
+  id: ID!
+  title: String!
+  description: String
+  gameType: GameType!         # DAILY, SELECT, VIBE, PRIME, PARTNER
+  status: GameStatus!         # SCHEDULED, ACTIVE, ENDED
+  entryFee: Int!
+  maxEntries: Int!
+  gridRows: Int!
+  gridCols: Int!
+  startTime: DateTime!
+  endTime: DateTime!
+  products: [GameProduct!]!
+  onchainTxHash: String
+  onchainContractAddr: String
+}
+
+type GameProduct {
+  id: ID!
+  name: String!
+  description: String
+  price: Int!
+  imageUrl: String!
+  brand: String
+}
+
+type Prize {
+  id: ID!
+  name: String!
+  description: String
+  imageUrl: String
+  giftshowCouponUrl: String
+}
+```

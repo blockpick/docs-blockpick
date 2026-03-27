@@ -1,0 +1,16 @@
+# ERD
+
+엔티티 간 관계도입니다.
+
+## 엔티티 관계
+
+- **User** → Entry: 1:N (사용자는 여러 게임에 참여)
+- **User** → ShippingAddress: 1:N (여러 배송지 등록)
+- **User** → Transaction: 1:N (여러 거래 기록)
+- **User** → Review: 1:N (여러 후기 작성)
+- **User** → Coupon: 1:N (여러 쿠폰 보유)
+- **Game** → GameProduct: 1:N (게임에 여러 상품)
+- **Game** → Entry: 1:N (게임에 여러 참여 기록)
+- **Game** → Prize: 1:N (게임에 여러 상품 배정)
+- **Entry** → Prize: 1:0..1 (참여 기록에 당첨 상품)
+- **Prize** → Review: 1:0..1 (당첨 상품에 후기)

@@ -1,0 +1,68 @@
+# 웹 (Next.js)
+
+web-blockpick의 기술 스택입니다.
+
+## 기술 스택
+
+| 분류 | 기술 | 버전 |
+|------|------|------|
+| 프레임워크 | Next.js (App Router) | 16.1.6 |
+| 언어 | TypeScript + React | 5.x / 19.2.3 |
+| 상태 관리 | Zustand | 5.0.11 |
+| API 클라이언트 | Apollo Client | 3.12.11 |
+| 스타일링 | Tailwind CSS | 4.x |
+| 애니메이션 | Framer Motion | 12.35.0 |
+| 3D 그래픽 | Three.js + R3F | 0.170.0 / 9.5.0 |
+| 3D 유틸 | @react-three/drei | 10.7.7 |
+| 3D 물리 | @react-three/rapier | 2.2.0 |
+| 후처리 | @react-three/postprocessing | 3.0.4 |
+| 2D 물리 | Matter.js | 0.20.0 |
+| AR/비전 | MediaPipe Tasks Vision | 0.10.34 |
+| Lottie | lottie-web | 5.13.0 |
+
+## 프로젝트 구조
+
+```
+web-blockpick/
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── page.tsx              # 랜딩 페이지
+│   │   ├── globals.css           # 전역 스타일 + 테마
+│   │   ├── game/                 # 게임 라우트
+│   │   │   ├── page.tsx          # 게임 목록
+│   │   │   ├── [id]/page.tsx     # 게임 상세 (메인)
+│   │   │   ├── singularity/      # 프리미엄: 우주 테마
+│   │   │   └── abyssal/          # 프리미엄: 심해 테마
+│   │   └── more/                 # 미니게임
+│   │       ├── page.tsx          # 미니게임 목록
+│   │       └── [id]/             # 30종+ 미니게임
+│   ├── components/
+│   │   ├── ui/                   # 공통 UI (Modal, Nav, Toast)
+│   │   └── game/                 # 게임 컴포넌트
+│   │       ├── GachaCanvas.tsx   # 메인 가챠 캔버스
+│   │       ├── GameResult.tsx    # 결과 모달
+│   │       ├── abyssal/          # 심해 게임 시스템
+│   │       └── singularity/      # 우주 게임 시스템
+│   └── lib/
+│       ├── graphql/              # Apollo 클라이언트, 쿼리, 뮤테이션
+│       ├── store/                # Zustand 스토어 (auth, game)
+│       ├── bridge/               # Flutter WebView 브릿지
+│       └── utils/                # 캔버스, 파티클, 딥링크 유틸
+└── public/                       # 정적 에셋, 폰트
+```
+
+## 상태 관리 (Zustand)
+
+### Auth Store
+- `user`, `isLoggedIn`
+- `accessToken`, `refreshToken`
+- `showLoginModal`, `showPhoneModal`
+- `context` (app vs web 감지)
+- `login()`, `logout()`, `restoreSession()`
+
+### Game Store
+- `game`, `phase` (loading → ready → result)
+- `selectedBlock` \{row, col\}
+- `prize`, `isWin`, `entryId`
+- `guestToken` (비회원)
+- `selectBlock()`, `setPrize()`, `reset()`

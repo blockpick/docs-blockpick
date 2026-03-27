@@ -1,0 +1,40 @@
+# 로그인
+
+## 이메일/비밀번호 로그인 (FR-002)
+
+| 항목 | 내용 |
+|------|------|
+| **구현 상태** | 완료 (앱+웹) |
+| **입력** | 이메일, 비밀번호 |
+| **출력** | accessToken, refreshToken, 사용자 정보 |
+| **비즈니스 규칙** | 5회 연속 실패 시 잠금 (추후), 토큰 자동 갱신 |
+
+## Google 소셜 로그인 (FR-003)
+
+| 항목 | 내용 |
+|------|------|
+| **구현 상태** | 완료 (앱) |
+| **설명** | Google OAuth 2.0으로 로그인/회원가입 |
+| **비즈니스 규칙** | 최초 소셜 로그인 시 전화번호 인증 + 약관 동의 필요 |
+
+## Apple 소셜 로그인 (FR-004)
+
+| 항목 | 내용 |
+|------|------|
+| **구현 상태** | 완료 (앱, iOS) |
+| **설명** | Apple ID로 로그인/회원가입 |
+| **비즈니스 규칙** | Apple 앱스토어 가이드라인 준수 필수, 전화번호 인증 필요 |
+
+## 인증 API
+
+| 오퍼레이션 | 타입 | 입력 | 출력 |
+|-----------|------|------|------|
+| `login` | Mutation | email, password | accessToken, refreshToken, user |
+| `signUp` | Mutation | email, password, phone | user |
+| `refreshToken` | Mutation | refreshToken | accessToken, refreshToken |
+| `sendVerificationCode` | Mutation | email | success |
+| `verifyCode` | Mutation | email, code | success |
+| `resetPassword` | Mutation | email, newPassword | success |
+| `sendSmsVerificationCode` | Mutation | phone | success |
+| `verifySmsCode` | Mutation | phone, code | success |
+| `findEmail` | Mutation | phone | email (마스킹) |

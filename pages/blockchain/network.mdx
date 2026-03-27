@@ -1,0 +1,24 @@
+# 네트워크
+
+블록픽이 사용하는 블록체인 네트워크 정보입니다.
+
+## Ronin Mainnet
+
+| 항목 | 내용 |
+|------|------|
+| **체인** | Ronin Mainnet |
+| **Chain ID** | 2020 |
+| **프로토콜** | EVM 호환 (Ethereum JSON-RPC) |
+| **클라이언트** | web3dart 2.7.3 (Flutter) |
+
+## Ronin이란?
+
+Ronin은 Axie Infinity 생태계에서 시작된 EVM 호환 블록체인입니다. Ethereum과 호환되므로 기존 Ethereum 도구와 라이브러리를 사용할 수 있습니다.
+
+## 연동 방식
+
+앱에서 Ronin 노드에 RPC로 직접 호출합니다.
+
+```
+Flutter 앱 → web3dart → Ronin RPC 노드 → 블록체인
+```

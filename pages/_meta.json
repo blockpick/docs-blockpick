@@ -1,0 +1,36 @@
+{
+  "index": "홈",
+  "-- 서비스": {
+    "type": "separator",
+    "title": "서비스"
+  },
+  "getting-started": "시작하기",
+  "user-flow": "사용자 흐름",
+  "auth": "인증 시스템",
+  "-- 기능": {
+    "type": "separator",
+    "title": "기능"
+  },
+  "screens": "화면 구성",
+  "game-system": "게임 시스템",
+  "blockchain": "블록체인",
+  "currency": "재화 시스템",
+  "business-model": "수익 모델",
+  "-- 기술": {
+    "type": "separator",
+    "title": "기술"
+  },
+  "design-system": "디자인 시스템",
+  "tech-stack": "기술 스택",
+  "data": "데이터",
+  "integrations": "외부 연동",
+  "-- 운영": {
+    "type": "separator",
+    "title": "운영"
+  },
+  "requirements": "요구사항",
+  "roadmap": "로드맵",
+  "risks": "리스크",
+  "development": "개발 현황",
+  "appendix": "부록"
+}

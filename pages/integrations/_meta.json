@@ -1,0 +1,10 @@
+{
+  "overview": "연동 목록",
+  "ronin": "Ronin 블록체인",
+  "aws-s3": "AWS S3",
+  "giftshow": "기프티쇼",
+  "oauth": "소셜 로그인",
+  "admob": "Google AdMob",
+  "sms": "SMS 서비스",
+  "upcoming": "미구현 연동"
+}
