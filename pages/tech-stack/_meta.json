@@ -2,5 +2,7 @@
   "web": "웹 (Next.js)",
   "app": "앱 (Flutter)",
   "backend": "백엔드",
-  "architecture": "아키텍처"
+  "architecture": "아키텍처",
+  "error-handling": "에러/오프라인 처리",
+  "caching-performance": "캐싱/성능"
 }

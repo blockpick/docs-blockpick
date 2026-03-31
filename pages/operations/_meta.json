@@ -1,0 +1,9 @@
+{
+  "push-notification-strategy": "푸시 알림 전략",
+  "deeplink-share-strategy": "딥링크 & 공유 전략",
+  "admin-workflow": "어드민 운영 워크플로우",
+  "analytics": "분석/이벤트 트래킹",
+  "content-policy": "콘텐츠 정책/모더레이션",
+  "version-management": "앱 버전 관리",
+  "monitoring": "모니터링/알림"
+}

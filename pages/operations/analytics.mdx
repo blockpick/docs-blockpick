@@ -1,0 +1,134 @@
+# 분석/이벤트 트래킹
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+  데이터 기반 의사결정을 위해 **모든 핵심 유저 행동을 이벤트로 수집**하고, 퍼널·리텐션·매출 지표를 실시간으로 모니터링합니다.
+</Callout>
+
+## 핵심 KPI
+
+| 카테고리 | KPI | 정의 | 목표값 (Phase 1) |
+|----------|-----|------|-----------------|
+| **활성** | DAU | 일일 활성 사용자 수 | - |
+| **활성** | WAU | 주간 활성 사용자 수 | - |
+| **활성** | MAU | 월간 활성 사용자 수 | - |
+| **리텐션** | D1 Retention | 가입 다음날 재방문율 | 40% 이상 |
+| **리텐션** | D7 Retention | 가입 7일 후 재방문율 | 20% 이상 |
+| **리텐션** | D30 Retention | 가입 30일 후 재방문율 | 10% 이상 |
+| **참여** | 게임 참여율 | DAU 중 1회 이상 게임 참여 비율 | 60% 이상 |
+| **매출** | 충전 전환율 | DAU 중 1회 이상 충전한 비율 | 5% 이상 |
+| **매출** | ARPU | 전체 유저 1인당 평균 매출 | - |
+| **매출** | ARPPU | 결제 유저 1인당 평균 매출 | - |
+
+---
+
+## 주요 퍼널
+
+### 가입 → 첫 참여 → 재참여 → 충전 → 반복 충전
+
+```
+가입 (sign_up)
+  └→ 첫 게임 참여 (first_game)
+       └→ 재참여 (2회차 game_join)
+            └→ 첫 충전 (checkout_complete)
+                 └→ 반복 충전 (2회차 checkout_complete)
+```
+
+| 퍼널 단계 | 전환율 목표 | 드롭오프 대응 |
+|-----------|------------|--------------|
+| 가입 → 첫 참여 | 70% | 온보딩 개선, 웰컴 포인트 |
+| 첫 참여 → 재참여 | 50% | 푸시 알림, DAILY 게임 안내 |
+| 재참여 → 첫 충전 | 15% | 포인트 소진 시 충전 유도 |
+| 첫 충전 → 반복 충전 | 40% | 패키지 할인, 보너스 포인트 |
+
+---
+
+## 이벤트 목록
+
+### 앱/인증 이벤트
+
+| 이벤트명 | 트리거 | 파라미터 | 도구 |
+|----------|--------|----------|------|
+| `app_open` | 앱 실행 시 | `source` (organic/push/deeplink), `app_version` | Firebase Analytics |
+| `sign_up` | 회원가입 완료 | `method` (kakao/apple/google), `referral_code` | Firebase Analytics |
+
+### 게임 이벤트
+
+| 이벤트명 | 트리거 | 파라미터 | 도구 |
+|----------|--------|----------|------|
+| `first_game` | 최초 게임 참여 | `gameType` (daily/vibe/prime) | Firebase Analytics |
+| `game_join` | 게임 참여 | `gameType`, `gameId`, `fee` | Firebase Analytics |
+| `game_result` | 게임 결과 확인 | `gameId`, `result` (won/lost), `prizeValue` | Firebase Analytics |
+
+### 소원/소셜 이벤트
+
+| 이벤트명 | 트리거 | 파라미터 | 도구 |
+|----------|--------|----------|------|
+| `wish_create` | 소원 등록 | `productUrl`, `priceRange`, `category` | Firebase Analytics |
+| `wish_empathy` | 소원 공감 | `wishId`, `currentCount`, `targetCount` | Firebase Analytics |
+| `share_wish` | 소원 공유 | `wishId`, `channel` (kakao/link/etc) | Firebase Analytics |
+| `share_win` | 당첨 공유 | `gameId`, `prizeId`, `channel` | Firebase Analytics |
+
+### 리워드/미니게임 이벤트
+
+| 이벤트명 | 트리거 | 파라미터 | 도구 |
+|----------|--------|----------|------|
+| `ad_watched` | 광고 시청 완료 | `context` (reward/bonus), `adNetwork` | Firebase Analytics |
+| `mini_game_play` | 미니게임 시작 | `gameId`, `gameType` | Firebase Analytics |
+| `mini_game_clear` | 미니게임 클리어 | `gameId`, `reward` | Firebase Analytics |
+| `attendance_check` | 출석체크 완료 | `consecutiveDays`, `reward` | Firebase Analytics |
+
+### 결제 이벤트
+
+| 이벤트명 | 트리거 | 파라미터 | 도구 |
+|----------|--------|----------|------|
+| `checkout_start` | 결제 시작 | `packageId`, `amount`, `method` | Firebase Analytics |
+| `checkout_complete` | 결제 완료 | `packageId`, `amount`, `pointsReceived` | Firebase Analytics |
+
+---
+
+## 대시보드 설계
+
+### 실시간 대시보드
+
+- **DAU** (현재 일일 활성 유저 수)
+- **동시접속자 수** (1분 단위 갱신)
+- **진행 중인 게임 수** / 참여자 현황
+- **실시간 매출** (충전 발생 건수 + 금액)
+
+### 일간 대시보드
+
+- 게임 유형별 참여 수 / 당첨 수
+- 일일 매출 (충전 금액 합계)
+- 신규 가입 수 / 탈퇴 수
+- 광고 시청 건수 / 보상 지급량
+
+### 주간 대시보드
+
+- **리텐션 커브** (D1~D30)
+- **퍼널 전환율** (가입→충전 전체 퍼널)
+- 주간 게임 유형별 매출 비교
+- 소원 등록/공감/게임 전환 추이
+
+### 월간 대시보드
+
+- **LTV (유저 생애 가치)** 추정
+- **코호트 분석** (가입 월별 리텐션 비교)
+- 월간 ARPU / ARPPU 추이
+- 충전 패키지별 판매 비중
+
+---
+
+## 도구 스택
+
+| 도구 | 용도 | 단계 |
+|------|------|------|
+| **Firebase Analytics** | 이벤트 수집, 기본 퍼널/리텐션 | Phase 1 |
+| **BigQuery** | Firebase 원본 데이터 분석, 커스텀 쿼리 | Phase 1 |
+| **Amplitude** | 고급 코호트 분석, 행동 세그먼트, A/B 테스트 분석 | Phase 2 |
+| **Looker Studio** | 대시보드 시각화 (BigQuery 연동) | Phase 1 |
+
+<Callout type="warning">
+  Phase 1에서는 Firebase Analytics + BigQuery로 핵심 지표를 커버하고, 유저 규모가 커지는 Phase 2에서 Amplitude를 도입하여 고급 행동 분석과 실험 분석을 수행합니다.
+</Callout>

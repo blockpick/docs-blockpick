@@ -1,0 +1,448 @@
+# 결제(PG) 연동
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning">
+  모바일 앱 내 디지털 재화(포인트) 판매는 **Apple App Store / Google Play Store 정책상 플랫폼 인앱 결제가 의무**입니다.
+  국내 PG사(토스페이먼츠, NHN KCP 등)를 통한 결제는 사용할 수 없습니다.
+</Callout>
+
+## 연동 정보
+
+| 항목 | 내용 |
+|------|------|
+| **용도** | 포인트 충전 (인앱 디지털 재화 구매) |
+| **연동 방식** | Apple StoreKit 2 + Google Play Billing Library 6+ |
+| **상품 유형** | Apple: Consumable / Google: One-time product |
+| **수수료** | 15% (소규모 개발자 프로그램 적용 시) |
+| **상태** | 미구현 |
+
+---
+
+## 1. 포인트 패키지 설계
+
+6단계 패키지로 구성하며, 고액 패키지일수록 보너스율이 높아지는 구조입니다.
+
+| 패키지 | 가격 | 기본P | 보너스P | 총 지급 | 보너스율 |
+|--------|------|-------|---------|---------|----------|
+| 입문 | ₩1,500 | 1,000P | 0P | 1,000P | 0% |
+| 베이직 | ₩4,900 | 3,500P | 200P | 3,700P | 5.7% |
+| 스탠다드 | ₩9,900 | 7,000P | 700P | 7,700P | 10% |
+| 프리미엄 | ₩24,000 | 18,000P | 2,700P | 20,700P | 15% |
+| VIP | ₩55,000 | 42,000P | 8,400P | 50,400P | 20% |
+| 얼티밋 | ₩110,000 | 85,000P | 21,250P | 106,250P | 25% |
+
+<Callout type="info">
+  보너스 포인트는 내부적으로 **무료 출처**로 분류됩니다. 환불 시 무료 포인트가 먼저 회수됩니다.
+  포인트 출처 추적에 대한 상세는 [재화 시스템](/currency)을 참조하세요.
+</Callout>
+
+### 1-1. 첫 충전 2배 혜택
+
+유저의 첫 결제 전환을 유도하기 위한 프로모션입니다.
+
+- **조건**: 계정 생성 후 최초 1회 충전
+- **혜택**: 보너스 = 기본 포인트와 동일 금액 (사실상 2배 지급)
+- **출처 분류**: 추가 보너스는 **무료 포인트**로 분류
+- **예시**: 스탠다드(₩9,900) 첫 충전 시 → 기본 7,000P + 첫충전보너스 7,000P + 일반보너스 700P = **14,700P**
+
+---
+
+## 2. 결제 플로우
+
+### 2-1. 정상 결제 흐름
+
+```
+[클라이언트]                    [백엔드 서버]                [Apple/Google 서버]
+     │                               │                              │
+     │  1. 패키지 선택                │                              │
+     │──────────────────────────────>│                              │
+     │                               │  2. intent 생성              │
+     │                               │  (멱등성 키 발급)            │
+     │  3. intent 응답               │                              │
+     │<──────────────────────────────│                              │
+     │                               │                              │
+     │  4. StoreKit/BillingClient 결제 시작                         │
+     │─────────────────────────────────────────────────────────────>│
+     │                               │                              │
+     │  5. 결제 완료 (영수증/토큰)                                  │
+     │<─────────────────────────────────────────────────────────────│
+     │                               │                              │
+     │  6. 영수증 전송               │                              │
+     │──────────────────────────────>│                              │
+     │                               │  7. 서버 영수증 검증         │
+     │                               │─────────────────────────────>│
+     │                               │  8. 검증 결과                │
+     │                               │<─────────────────────────────│
+     │                               │                              │
+     │                               │  9. 포인트 지급              │
+     │                               │  (원자적 DB 트랜잭션)        │
+     │                               │                              │
+     │  10. 지급 완료 응답           │                              │
+     │<──────────────────────────────│                              │
+     │                               │                              │
+     │  11. finish/consume 호출                                     │
+     │─────────────────────────────────────────────────────────────>│
+```
+
+### 2-2. 핵심 원칙
+
+| 원칙 | 설명 |
+|------|------|
+| **서버 사이드 검증** | 클라이언트 영수증을 절대 신뢰하지 않음. 반드시 Apple/Google 서버에 직접 검증 요청 |
+| **멱등성 키** | intent 생성 시 고유 키를 발급하여 동일 결제의 중복 지급 방지 |
+| **원자적 트랜잭션** | 포인트 지급 + 결제 기록 저장 + 멱등성 키 소비를 하나의 DB 트랜잭션으로 처리 |
+| **finish/consume 후행** | 포인트 지급이 확정된 후에만 스토어에 소비 완료 처리. 미완료 시 앱 재시작 때 복구 가능 |
+
+### 2-3. 미완료 결제 자동 복구
+
+앱 시작 시 미완료 결제를 자동으로 감지하고 복구합니다.
+
+```
+[앱 시작]
+     │
+     ├─ StoreKit: 미완료 트랜잭션 큐 확인
+     │   └─ Transaction.updates / SKPaymentQueue.updatedTransactions
+     │
+     ├─ BillingClient: queryPurchasesAsync() 호출
+     │   └─ PURCHASED 상태이나 consumed 아닌 항목 조회
+     │
+     └─ 미완료 건 발견 시
+         ├─ 서버에 영수증 재전송
+         ├─ 서버 검증 + 멱등성 키 확인 (이미 지급 완료면 skip)
+         └─ finish/consume 처리
+```
+
+---
+
+## 3. 환불 처리
+
+### 3-1. 환불 정책
+
+<Callout type="warning">
+  블록픽 앱 내에서 직접 환불 기능은 제공하지 않습니다. 모든 환불은 **Apple App Store / Google Play Store**를 통해서만 처리됩니다.
+</Callout>
+
+### 3-2. 환불 알림 수신
+
+| 플랫폼 | 알림 방식 | 설명 |
+|--------|-----------|------|
+| Apple | Server Notifications V2 | App Store Server Notifications endpoint 등록 |
+| Google | RTDN (Real-Time Developer Notifications) | Google Cloud Pub/Sub 구독 |
+
+### 3-3. 환불 시 포인트 회수 로직
+
+환불 발생 시 아래 순서로 포인트를 회수합니다.
+
+```
+1. 보너스(무료) 포인트 먼저 회수
+2. 기본(유료) 포인트 회수
+3. 잔액 부족 시 → 미수금(negative balance) 처리
+```
+
+**회수 예시**:
+
+| 상황 | 충전 내역 | 현재 잔액 | 회수 대상 | 처리 |
+|------|-----------|-----------|-----------|------|
+| 잔액 충분 | 스탠다드(7,000P + 700P) | 8,000P | 700P(무료) + 7,000P(유료) | 정상 회수 |
+| 잔액 부족 | 스탠다드(7,000P + 700P) | 3,000P | 700P(무료) + 2,300P(유료) | 4,700P 미수금 |
+| 잔액 없음 | 스탠다드(7,000P + 700P) | 0P | 0P | 7,700P 미수금 |
+
+<Callout type="info">
+  미수금이 발생한 계정은 추후 충전 시 미수금을 우선 차감합니다. 미수금 누적 시 계정 이용이 제한될 수 있습니다.
+</Callout>
+
+---
+
+## 4. 에러 처리
+
+### 4-1. 결제 실패 유형
+
+| 유형 | 원인 | 클라이언트 대응 | 서버 대응 |
+|------|------|-----------------|-----------|
+| 유저 취소 | 결제 창에서 취소 | 안내 메시지 표시, 재시도 유도 | intent 만료 처리 |
+| 결제 수단 오류 | 카드 한도 초과, 잔액 부족 등 | 스토어 에러 메시지 전달 | 로그 기록 |
+| 네트워크 오류 | 결제 중 네트워크 단절 | 미완료 결제 복구 플로우 진입 | Notification으로 후속 처리 |
+| 스토어 장애 | Apple/Google 서버 다운 | 일시적 오류 안내, 자동 재시도 | 모니터링 알림 |
+| 영수증 검증 실패 | 위변조, 만료, 이미 사용된 영수증 | 고객센터 안내 | 부정결제 로그 + 차단 검토 |
+
+### 4-2. 미지급 복구 전략
+
+```
+[결제 성공 but 포인트 미지급]
+     │
+     ├─ 1차: 클라이언트 자동 재시도 (앱 재시작 시)
+     │       └─ 미완료 트랜잭션 감지 → 서버 재전송
+     │
+     ├─ 2차: 서버 Notification 수신
+     │       └─ Apple/Google에서 결제 완료 알림 → 서버 자체 지급 처리
+     │
+     └─ 3차: CS 수동 처리
+             └─ 유저 문의 → 영수증 대조 → 수동 포인트 지급
+```
+
+---
+
+## 5. 플랫폼별 구현 상세
+
+### 5-1. Apple (StoreKit 2)
+
+| 항목 | 상세 |
+|------|------|
+| **프레임워크** | StoreKit 2 (Swift Concurrency 기반) |
+| **상품 유형** | Consumable |
+| **영수증 검증** | App Store Server API (`/inApps/v1/transactions/{transactionId}`) |
+| **알림** | App Store Server Notifications V2 |
+| **Sandbox 테스트** | Xcode StoreKit Configuration + Sandbox 계정 |
+
+```
+// StoreKit 2 결제 플로우 (의사코드)
+let product = try await Product.products(for: ["com.blockpick.points.standard"])
+let result = try await product.first?.purchase()
+
+switch result {
+    case .success(let verification):
+        let transaction = try checkVerified(verification)
+        // 서버에 영수증 전송 → 포인트 지급 확인
+        await sendReceiptToServer(transaction)
+        await transaction.finish()
+    case .userCancelled:
+        // 유저 취소 처리
+    case .pending:
+        // 보류 중 (가족 공유 승인 대기 등)
+}
+```
+
+### 5-2. Google (Play Billing Library 6+)
+
+| 항목 | 상세 |
+|------|------|
+| **라이브러리** | Google Play Billing Library 6+ |
+| **상품 유형** | One-time product (INAPP) |
+| **영수증 검증** | Google Play Developer API (`purchases.products.get`) |
+| **알림** | RTDN (Google Cloud Pub/Sub) |
+| **테스트** | 라이선스 테스터 계정 + 테스트 트랙 |
+
+```
+// Play Billing 결제 플로우 (의사코드)
+val productDetails = billingClient.queryProductDetails(params)
+val flowParams = BillingFlowParams.newBuilder()
+    .setProductDetailsParamsList(listOf(
+        ProductDetailsParams.newBuilder()
+            .setProductDetails(productDetails)
+            .build()
+    ))
+    .build()
+billingClient.launchBillingFlow(activity, flowParams)
+
+// PurchasesUpdatedListener 콜백
+override fun onPurchasesUpdated(result: BillingResult, purchases: List<Purchase>?) {
+    if (result.responseCode == OK && purchases != null) {
+        for (purchase in purchases) {
+            // 서버에 purchaseToken 전송 → 포인트 지급 확인
+            sendTokenToServer(purchase.purchaseToken)
+            // 지급 확인 후 consume
+            billingClient.consumePurchase(
+                ConsumeParams.newBuilder()
+                    .setPurchaseToken(purchase.purchaseToken)
+                    .build()
+            )
+        }
+    }
+}
+```
+
+---
+
+## 6. 상품 ID 규칙
+
+```
+com.blockpick.points.{tier}
+
+예시:
+com.blockpick.points.entry       // 입문 ₩1,500
+com.blockpick.points.basic       // 베이직 ₩4,900
+com.blockpick.points.standard    // 스탠다드 ₩9,900
+com.blockpick.points.premium     // 프리미엄 ₩24,000
+com.blockpick.points.vip         // VIP ₩55,000
+com.blockpick.points.ultimate    // 얼티밋 ₩110,000
+```
+
+<Callout type="info">
+  Apple App Store Connect와 Google Play Console에 동일한 상품 ID를 등록합니다. 가격은 각 스토어의 가격 티어에 맞춰 설정하며, 환율 변동에 따라 미세한 차이가 있을 수 있습니다.
+</Callout>
+
+---
+
+## 7. 법적 요건
+
+### 7-1. 전자상거래법 준수
+
+| 요건 | 대응 |
+|------|------|
+| **환불 규정** 표시 | 결제 화면에 환불 정책 명시 (스토어 환불 경로 안내) |
+| **영수증 발급** | 결제 완료 시 인앱 영수증 확인 화면 제공 |
+| **가격 표시** | VAT 포함 최종 가격 표시 (스토어 기본 정책) |
+
+### 7-2. 미성년자 보호
+
+| 항목 | 내용 |
+|------|------|
+| **월 결제 한도** | 7만원 (제안) |
+| **연령 확인** | 회원가입 시 생년월일 수집, 만 14세 미만 법정대리인 동의 |
+| **한도 초과 시** | 결제 차단 + "이번 달 충전 한도에 도달했습니다" 안내 |
+
+### 7-3. 사행성 규제 대응
+
+<Callout type="warning">
+  블록픽은 포인트로 게임에 참여하는 구조이므로, 사행성 논란을 방지하기 위한 설계가 필수입니다.
+</Callout>
+
+| 대응 | 설명 |
+|------|------|
+| **확률 공개** | 게임별 당첨 확률을 게임 참여 화면에 명시 |
+| **일일 참여 제한** | 게임별 일일 최대 참여 횟수 설정 |
+| **포인트 현금 전환 불가** | 포인트는 게임 참여에만 사용, 현금 출금 불가 |
+| **무료 참여 보장** | 매일 1회 무료 참여로 과금 없이 이용 가능 |
+
+---
+
+## 8. 서버 API 설계
+
+### 8-1. 주요 Endpoint
+
+| Method | Path | 설명 |
+|--------|------|------|
+| `POST` | `/api/payment/intent` | 결제 intent 생성 (멱등성 키 발급) |
+| `POST` | `/api/payment/verify/apple` | Apple 영수증 검증 + 포인트 지급 |
+| `POST` | `/api/payment/verify/google` | Google purchaseToken 검증 + 포인트 지급 |
+| `POST` | `/api/payment/webhook/apple` | Apple Server Notifications V2 수신 |
+| `POST` | `/api/payment/webhook/google` | Google RTDN 수신 |
+| `GET` | `/api/payment/history` | 결제 내역 조회 |
+| `GET` | `/api/payment/packages` | 포인트 패키지 목록 조회 |
+
+### 8-2. Intent 생성 요청/응답
+
+```json
+// POST /api/payment/intent
+// Request
+{
+  "packageId": "standard",
+  "platform": "apple"
+}
+
+// Response
+{
+  "intentId": "pay_intent_abc123",
+  "idempotencyKey": "idem_xyz789",
+  "packageId": "standard",
+  "expectedPoints": 7700,
+  "isFirstPurchase": true,
+  "firstPurchaseBonus": 7000,
+  "createdAt": "2026-03-31T12:00:00Z",
+  "expiresAt": "2026-03-31T12:30:00Z"
+}
+```
+
+### 8-3. 영수증 검증 요청/응답
+
+```json
+// POST /api/payment/verify/apple
+// Request
+{
+  "intentId": "pay_intent_abc123",
+  "idempotencyKey": "idem_xyz789",
+  "transactionId": "2000000123456789",
+  "originalTransactionId": "2000000123456789"
+}
+
+// Response (성공)
+{
+  "success": true,
+  "pointsGranted": {
+    "base": 7000,
+    "bonus": 700,
+    "firstPurchaseBonus": 7000,
+    "total": 14700
+  },
+  "newBalance": 14700,
+  "transactionId": "txn_blockpick_001"
+}
+```
+
+---
+
+## 9. DB 스키마 (주요 테이블)
+
+```sql
+-- 결제 Intent
+CREATE TABLE payment_intents (
+  id              VARCHAR(50)  PRIMARY KEY,
+  user_id         VARCHAR(50)  NOT NULL,
+  package_id      VARCHAR(20)  NOT NULL,
+  platform        VARCHAR(10)  NOT NULL,  -- 'apple' | 'google'
+  idempotency_key VARCHAR(50)  UNIQUE NOT NULL,
+  status          VARCHAR(20)  NOT NULL DEFAULT 'pending',
+                  -- pending | completed | expired | failed
+  created_at      TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  expires_at      TIMESTAMPTZ  NOT NULL,
+  completed_at    TIMESTAMPTZ
+);
+
+-- 결제 기록
+CREATE TABLE payment_transactions (
+  id                VARCHAR(50)  PRIMARY KEY,
+  intent_id         VARCHAR(50)  NOT NULL REFERENCES payment_intents(id),
+  user_id           VARCHAR(50)  NOT NULL,
+  platform          VARCHAR(10)  NOT NULL,
+  store_transaction_id VARCHAR(100) NOT NULL,
+  package_id        VARCHAR(20)  NOT NULL,
+  amount_krw        INTEGER      NOT NULL,
+  points_base       INTEGER      NOT NULL,
+  points_bonus      INTEGER      NOT NULL DEFAULT 0,
+  points_first_bonus INTEGER     NOT NULL DEFAULT 0,
+  points_total      INTEGER      NOT NULL,
+  is_first_purchase BOOLEAN      NOT NULL DEFAULT FALSE,
+  status            VARCHAR(20)  NOT NULL DEFAULT 'completed',
+  verified_at       TIMESTAMPTZ  NOT NULL,
+  created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+
+-- 환불 기록
+CREATE TABLE payment_refunds (
+  id                VARCHAR(50)  PRIMARY KEY,
+  transaction_id    VARCHAR(50)  NOT NULL REFERENCES payment_transactions(id),
+  user_id           VARCHAR(50)  NOT NULL,
+  platform          VARCHAR(10)  NOT NULL,
+  points_recovered  INTEGER      NOT NULL DEFAULT 0,
+  points_deficit    INTEGER      NOT NULL DEFAULT 0,  -- 미수금
+  reason            TEXT,
+  refunded_at       TIMESTAMPTZ  NOT NULL,
+  created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+## 10. 성공 지표 (KPI)
+
+| 지표 | 목표 | 측정 방법 |
+|------|------|-----------|
+| 결제 전환율 | 5%+ | 결제 유저 / MAU |
+| 첫 충전 전환율 | 10%+ | 첫 충전 유저 / 신규 가입 유저 |
+| ARPPU | ₩15,000+/월 | 월 결제 총액 / 결제 유저 수 |
+| 결제 성공률 | 98%+ | 성공 건 / 결제 시도 건 |
+| 첫 충전까지 평균 시간 | 3일 이내 | 가입일 ~ 첫 결제일 |
+| 재충전율 | 40%+ | 2회 이상 충전 유저 / 전체 충전 유저 |
+
+---
+
+## 11. 모니터링 & 알림
+
+| 항목 | 임계값 | 알림 채널 |
+|------|--------|-----------|
+| 결제 성공률 하락 | < 95% (5분간) | Slack 긴급 채널 |
+| 영수증 검증 실패 급증 | > 10건/분 | Slack + PagerDuty |
+| 미지급 건 누적 | > 5건 | Slack 운영 채널 |
+| 환불 급증 | > 일 평균 3배 | Slack 운영 채널 |
+| 스토어 API 응답 지연 | > 5초 | 서버 모니터링 대시보드 |

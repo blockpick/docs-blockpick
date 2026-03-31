@@ -2,5 +2,7 @@
   "technical": "기술적 제약",
   "business": "비즈니스 제약",
   "risk-analysis": "리스크 분석",
-  "emergency": "비상 대응"
+  "anti-fraud": "부정행위 방지",
+  "emergency": "비상 대응",
+  "legal-gambling": "사행성 법적 검토"
 }

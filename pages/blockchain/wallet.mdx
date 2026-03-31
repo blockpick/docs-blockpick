@@ -1,0 +1,117 @@
+# 블록체인 지갑
+
+사용자의 블록체인 지갑 생성, 저장, 관리 방식입니다.
+
+import { Callout } from 'nextra/components'
+
+## 개요
+
+블록픽은 사용자별 **Ronin 블록체인 지갑**을 자동으로 생성·관리합니다. 게임 참여 시 좌표를 암호화하여 블록체인에 기록하는 데 사용됩니다.
+
+<Callout type="warning">
+  사용자가 직접 지갑을 관리하지 않습니다. 앱이 자동으로 생성·보관하며, 사용자는 지갑의 존재를 의식할 필요 없이 게임에 참여합니다.
+</Callout>
+
+## 지갑 생성
+
+| 항목 | 내용 |
+|------|------|
+| **생성 시점** | 앱 최초 실행 시 자동 생성 |
+| **생성 방식** | `EthPrivateKey.createRandom()` (Random.secure 기반) |
+| **지갑 타입** | Ethereum 호환 (Ronin 네트워크) |
+| **니모닉** | 현재 미지원 (추후 BIP39 백업 기능 검토) |
+
+### 생성 플로우
+
+```
+앱 최초 실행
+  → getOrCreateWallet() 호출
+  → 저장된 지갑 확인 (loadWallet)
+  → 없으면 → 새 지갑 생성 (createWallet)
+  → 있으면 → 기존 지갑 로드
+```
+
+## 저장 위치
+
+| 항목 | 저장소 | 키 |
+|------|--------|-----|
+| **개인키** (Private Key) | Flutter Secure Storage | `blockchain_wallet_private_key` |
+| **지갑 주소** (Address) | Flutter Secure Storage | `blockchain_wallet_address` |
+| **니모닉** (Mnemonic) | Flutter Secure Storage | `blockchain_wallet_mnemonic` |
+
+### Flutter Secure Storage 세부
+
+| 플랫폼 | 저장소 |
+|--------|--------|
+| **iOS** | Keychain Services (하드웨어 암호화) |
+| **Android** | Android Keystore + EncryptedSharedPreferences |
+
+## 보안 원칙
+
+| 원칙 | 설명 |
+|------|------|
+| **개인키 로컬 전용** | 개인키는 디바이스 외부로 절대 전송하지 않음 |
+| **백엔드 미전송** | 서버에는 지갑 주소만 전달, 개인키는 전달하지 않음 |
+| **하드웨어 보호** | iOS Keychain / Android Keystore 기반 하드웨어 암호화 |
+| **사용자 비노출** | 사용자에게 개인키/니모닉을 직접 보여주지 않음 |
+
+## 지갑 사용 흐름
+
+### 게임 참여 시
+
+```
+1. 사용자가 블록 선택 (좌표)
+2. 앱이 로컬 지갑 로드 (loadWallet)
+3. 스마트 컨트랙트에서 암호화 키 조회 (getEncryptionKey)
+   - View 함수 호출 (가스비 없음)
+   - msg.sender로 권한 검증
+4. 좌표를 AES-256-CBC로 암호화 (CoordinateEncryptionService)
+   - 평문: { row, col, timestamp }
+   - 키: 스마트 컨트랙트에서 받은 hex 키
+5. 암호화된 좌표를 백엔드에 전송
+6. 트랜잭션 해시 발급 (온체인 기록)
+```
+
+### 암호화 상세
+
+| 항목 | 내용 |
+|------|------|
+| **알고리즘** | AES-256-CBC |
+| **키 길이** | 32바이트 (16바이트 키는 자동 확장) |
+| **IV** | 키의 앞 16바이트 (결정론적) |
+| **평문 형식** | JSON `{ "row": n, "col": n, "timestamp": "..." }` |
+| **암호문 형식** | Base64 인코딩 |
+
+<Callout type="info">
+  백엔드 운영자도 게임 종료 전까지 좌표를 복호화할 수 없습니다. 암호화 키는 스마트 컨트랙트가 관리하며, 게임 종료 시점에만 복호화가 진행됩니다.
+</Callout>
+
+## 스마트 컨트랙트 연동
+
+| 항목 | 내용 |
+|------|------|
+| **네트워크** | Ronin Mainnet (Chain ID: 2020) |
+| **RPC** | `https://api.roninchain.com/rpc` |
+| **주요 함수** | `requestEncryptionKey(index)` — 키 생성 (트랜잭션) |
+| | `getEncryptionKey(index)` — 키 조회 (View, 가스비 없음) |
+| **이벤트** | `EncryptionKeyGenerated(index, sender, key)` |
+
+## 리스크 및 대응
+
+| 리스크 | 확률 | 영향 | 대응 |
+|--------|------|------|------|
+| 앱 삭제로 키 분실 | 중 | 중 | 키 백업 방안 검토 (서버 에스크로 또는 시드 구문) |
+| 디바이스 변경 | 중 | 중 | 기기 이전 시 지갑 마이그레이션 필요 |
+| Ronin 네트워크 장애 | 낮음 | 높음 | 오프체인 Fallback + 복구 후 동기화 |
+
+## 구현 현황
+
+| 기능 | 상태 |
+|------|------|
+| 지갑 자동 생성 | 완료 |
+| Flutter Secure Storage 저장 | 완료 |
+| 지갑 로드/확인 | 완료 |
+| 좌표 암호화 (AES-256-CBC) | 완료 |
+| 스마트 컨트랙트 연동 | 완료 |
+| 니모닉 백업 | 미구현 |
+| 기기 이전 마이그레이션 | 미구현 |

@@ -16,6 +16,11 @@
   "blockchain": "블록체인",
   "currency": "재화 시스템",
   "business-model": "수익 모델",
+  "-- 성장": {
+    "type": "separator",
+    "title": "성장 전략"
+  },
+  "growth": "바이럴/공유 전략",
   "-- 기술": {
     "type": "separator",
     "title": "기술"
@@ -28,6 +33,7 @@
     "type": "separator",
     "title": "운영"
   },
+  "operations": "운영 기획",
   "requirements": "요구사항",
   "roadmap": "로드맵",
   "risks": "리스크",
