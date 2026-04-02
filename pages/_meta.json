@@ -16,6 +16,11 @@
   "blockchain": "블록체인",
   "currency": "재화 시스템",
   "business-model": "수익 모델",
+  "-- 전략": {
+    "type": "separator",
+    "title": "서비스 전략"
+  },
+  "strategy": "서비스 전략 기획",
   "-- 성장": {
     "type": "separator",
     "title": "성장 전략"
